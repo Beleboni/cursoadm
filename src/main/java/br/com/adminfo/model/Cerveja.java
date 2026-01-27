@@ -13,6 +13,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "cerveja")
@@ -22,12 +28,18 @@ public class Cerveja {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long codigo;
 	
+	@NotBlank(message = "SKU é obrigatorio")
 	private String sku;
 	
+	@NotBlank(message = "Nome é obrigatorio")
 	private String nome;
 	
+	@Size(min = 1, max =50, message="O tamanho da descrição deve estar em 1 e 50")
 	private String descricao;
 	
+	@NotNull(message = "Valor é obrigatório")
+	@DecimalMin(value = "0.50", message = "O valor da cerveja deve ser maior que R$0,50")
+	@DecimalMax(value = "9999999.99", message = "O valor da cerveja deve ser menor que R$9.999.999,99")
 	private BigDecimal valor;
 	
 	@Column(name = "teor_alcoolico")
@@ -35,6 +47,8 @@ public class Cerveja {
 	
 	private BigDecimal comissao;
 	
+	@NotNull(message = "Quantidade estoque é obrigatório")
+	@DecimalMax(value = "9999", message = "O valor da cerveja deve ser menor que 9.999")
 	@Column(name = "quantidade_estoque")
 	private Integer quantidadeEstoque;
 	

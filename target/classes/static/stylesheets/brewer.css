@@ -83,6 +83,7 @@
 
 /* Colunas comuns */
 .table-col-acoes {
+	text-align:center;
 	width: 80px;
 }
 

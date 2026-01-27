@@ -1,14 +1,27 @@
 package br.com.adminfo.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import br.com.adminfo.controller.page.PageWrapper;
 import br.com.adminfo.model.Cerveja;
 import br.com.adminfo.model.Origem;
 import br.com.adminfo.model.Sabor;
+import br.com.adminfo.repository.Cervejas;
 import br.com.adminfo.repository.Estilos;
+import br.com.adminfo.repository.filter.CervejaFilter;
+import br.com.adminfo.service.CervejaService;
 
 @Controller
 @RequestMapping("/cervejas")
@@ -16,6 +29,12 @@ public class CervejasController {
 	
 	@Autowired
 	private Estilos estilos;
+	
+	@Autowired
+	private Cervejas cervejas;
+	
+	@Autowired
+	private CervejaService cervejaService;
 	
 	@RequestMapping("/nova")
 	public ModelAndView novo(Cerveja cerveja) {
@@ -26,8 +45,29 @@ public class CervejasController {
 		return mv;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println("Olá mundo Java");
+	@PostMapping("/nova")
+	public ModelAndView cadastrar(@Valid Cerveja cerveja, BindingResult result, RedirectAttributes attributes) {
+		if(result.hasErrors()) {
+			return novo(cerveja);
+		}
+		
+		cervejaService.salvar(cerveja);
+		
+		attributes.addFlashAttribute("mensagem", "Cerveja cadastrada com sucesso!");
+		return new ModelAndView("redirect:/cervejas/nova");
+	}
+	
+	@GetMapping
+	public ModelAndView pesquisar(CervejaFilter cervejaFilter, @PageableDefault(size = 2) Pageable pageable, HttpServletRequest httpServletRequest) {
+		ModelAndView mv = new ModelAndView("cerveja/PesquisaCervejas");
+		mv.addObject("origens", Origem.values());
+		mv.addObject("sabores", Sabor.values());
+		mv.addObject("estilos", estilos.findAll());
+		
+		PageWrapper<Cerveja> paginaWrapper = new PageWrapper<>(cervejas.filtrar(cervejaFilter, pageable), httpServletRequest);
+		mv.addObject("pagina", paginaWrapper);
+		
+		return mv;
 	}
 	
 }
